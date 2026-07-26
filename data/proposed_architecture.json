@@ -1,0 +1,42 @@
+{
+  "solution_name": "Remote Mobility Access - illustrative synthetic design, not a real deployment",
+  "components": [
+    {
+      "id": "outer-vpn-gw",
+      "category": "VPN Gateway",
+      "layer": "outer",
+      "product": "SyntheticCorp EdgeGuard 4000",
+      "niap_validated": true
+    },
+    {
+      "id": "outer-vpn-client",
+      "category": "VPN Client",
+      "layer": "outer",
+      "product": "SyntheticCorp EdgeGuard Client",
+      "niap_validated": true,
+      "independent_ip_stack": true
+    },
+    {
+      "id": "inner-vpn-client",
+      "category": "VPN Client",
+      "layer": "inner",
+      "product": "SyntheticCorp EdgeGuard Client",
+      "niap_validated": true,
+      "independent_ip_stack": false
+    },
+    {
+      "id": "mdm-console",
+      "category": "Mobile Device Management",
+      "layer": "management",
+      "product": "SyntheticCorp FleetControl MDM",
+      "niap_validated": false
+    },
+    {
+      "id": "internal-ca",
+      "category": "Custom Key Vault",
+      "layer": "management",
+      "product": "SyntheticCorp KeyKeep",
+      "niap_validated": true
+    }
+  ]
+}
