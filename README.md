@@ -101,11 +101,16 @@ python csfc_checker.py
 ## Tests + CI
 
 `test_csfc_checker.py` covers every deterministic check function and every
-branch of `verify_findings` - no API key or network needed:
+branch of `verify_findings` - no API key or network needed.
+`test_csfc_checker_properties.py` adds Hypothesis property-based tests -
+e.g. layer-independence pass/fail is proven to exactly track set
+disjointness between outer/inner product names across hundreds of
+generated product-name combinations, not the one hand-picked example:
 
 ```bash
 pip install -r requirements-dev.txt
 pytest -q
+bandit -r . -x "./.venv" --severity-level medium  # security lint, CI runs this too
 ```
 
 ## Deployment path
