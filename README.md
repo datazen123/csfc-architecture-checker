@@ -24,25 +24,37 @@ configuration.
 
 ## On sourcing, stated precisely
 
-This repo's checks are grounded in well-corroborated CSfC architectural
-principles - cross-referenced across multiple official NSA-hosted document
-listings (Mobile Access Capability Package summaries, the CSfC Components
-List's own published category pages) that consistently describe the same
-requirements: two independent encryption layers (Outer Tunnel via IPsec,
-Inner Tunnel via IPsec or TLS/SRTP), independent IP stacks when both layers
-use VPN clients, and every component drawn from the real, NSA-published
-Components List categories (VPN Gateway, VPN Client, TLS Protected Server,
-Certificate Authority, Mobile Device Management), each requiring NIAP/CCEVS
-validation.
+**Where the rules come from**
 
-**What this repo does NOT claim**: exact requirement-ID citations from the
-primary Mobile Access Capability Package PDF itself. Five independent
-attempts to fetch that document directly - `media.defense.gov`, `nsa.gov`,
-and an `archive.org` mirror, via both direct HTTP and an automated fetch
-tool - were blocked by access controls / rate limiting on NSA's end, not
-by anything on this end. This repo names the real, verified architectural
-principle each check enforces, and states plainly that the primary
-document itself couldn't be independently reached.
+NSA publishes the real CSfC rules across a few official pages - capability-package summaries, and the CSfC Components List's own category pages.
+
+Cross-checking several of these pages, the same picture shows up every time:
+
+```
+  Outer Tunnel   →   Inner Tunnel
+    (IPsec)            (IPsec or TLS/SRTP)
+```
+
+Two independent layers, like above.
+
+If both layers use a VPN client, each one needs its own separate IP stack - no sharing.
+
+Every component has to come from a real published category:
+VPN Gateway, VPN Client, TLS Protected Server, Certificate Authority, Mobile Device Management.
+
+Every component needs NIAP validation - independent testing, not a vendor's own claim.
+
+**What we couldn't get to**
+
+NSA's primary source document was unreachable.
+
+We tried 5 times, from 3 different sources, 2 different methods. All 5 were blocked on NSA's end - not a problem here.
+
+**What that means**
+
+No exact requirement-ID citation from that document.
+
+Just the real principle behind each check, stated plainly - and an honest note that the primary document itself couldn't be reached.
 
 ## Why this exists
 
@@ -89,12 +101,43 @@ data/proposed_architecture.json (synthetic)
 
 ## Live result
 
-Run end-to-end against the real Anthropic API, first attempt, no
-correction pass needed: 5 components checked across 4 check categories, 4
-of 13 individual checks failed (an unlisted component category, an
-unvalidated MDM console, identical products used for both encryption
-layers, and a missing independent-IP-stack flag) - all 4 findings correctly
-explained and verified against their citations.
+Run end-to-end against the real Anthropic API. First attempt, no correction pass needed.
+
+**The 5 components checked:**
+
+| id | category | layer | product |
+|---|---|---|---|
+| outer-vpn-gw | VPN Gateway | outer | EdgeGuard 4000 |
+| outer-vpn-client | VPN Client | outer | EdgeGuard Client |
+| inner-vpn-client | VPN Client | inner | EdgeGuard Client |
+| mdm-console | Mobile Device Management | management | FleetControl MDM |
+| internal-ca | Custom Key Vault | management | KeyKeep |
+
+**The 4 check categories:**
+
+1. Component category - is this a real CSfC category?
+2. NIAP validation - is this certified?
+3. Layer independence - are outer and inner different products?
+4. Independent IP stack - only checked when both layers use a VPN Client
+
+**All 13 checks:**
+
+Component category (5 components, 1 fail):
+- outer-vpn-gw, outer-vpn-client, inner-vpn-client, mdm-console → pass
+- internal-ca → **FAIL** - "Custom Key Vault" isn't a real CSfC category
+
+NIAP validation (5 components, 1 fail):
+- outer-vpn-gw, outer-vpn-client, inner-vpn-client, internal-ca → pass
+- mdm-console → **FAIL** - not certified
+
+Layer independence (1 check, 1 fail):
+- **FAIL** - outer and inner layers both use "EdgeGuard Client"
+
+Independent IP stack (2 components, 1 fail):
+- outer-vpn-client → pass
+- inner-vpn-client → **FAIL** - missing the independent-stack flag
+
+**Result: 4 of 13 failed.** All 4 were explained by Claude and verified against their citations.
 
 ## Prerequisites
 
