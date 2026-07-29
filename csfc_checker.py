@@ -1,12 +1,16 @@
 """
 CSfC (Commercial Solutions for Classified) architecture checker.
 
-Deterministic code checks a proposed layered-encryption network
-architecture against real NSA CSfC program requirements. Claude's job is
-the part that's actually a language task: explaining the security risk of
-each violation in plain language and drafting a remediation - it never
-decides whether a component is validated or whether the layers are
-independent; that's computed in code from the architecture description.
+Checks a proposed CSfC architecture - the NSA program that lets sensitive
+government data travel over ordinary commercial encryption products
+instead of custom military-grade hardware, as long as it's wrapped in two
+independent encryption layers, each built only from NSA-approved product
+categories and individually certified secure (NIAP validation).
+
+Every check here is answered entirely by plain code - not by Claude, and
+not by a person reviewing it live. Claude's only job is explaining, in
+plain language, why a failed check matters operationally and drafting a
+remediation.
 
 **On sourcing, stated precisely**: this repo's checks are grounded in
 well-corroborated CSfC architectural principles - cross-referenced across
@@ -17,12 +21,9 @@ requirement-ID citations from the primary Capability Package PDF itself:
 five independent attempts to fetch that PDF directly (media.defense.gov,
 nsa.gov, and an archive.org mirror, via both direct HTTP and an automated
 fetch tool) were blocked by access controls / rate limiting on NSA's end,
-not by anything on this end. Rather than invent a specific requirement
-number to sound more precise, this repo names the real, verified
-architectural principle each check enforces and says plainly that the
-primary document itself couldn't be independently reached - the same
-"cite it or say you couldn't verify it" discipline used everywhere else in
-this portfolio.
+not by anything on this end. This repo names the real, verified
+architectural principle each check enforces, and states plainly that the
+primary document itself couldn't be independently reached.
 
 Run:
     export ANTHROPIC_API_KEY=sk-ant-...

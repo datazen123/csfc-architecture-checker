@@ -1,16 +1,26 @@
 # csfc-architecture-checker
 
-Deterministic code checks a proposed CSfC (Commercial Solutions for
-Classified) layered-encryption network architecture against real NSA CSfC
-program requirements - component categories, NIAP validation, layer
-independence, and independent IP stacks. Claude's job is the part that's
-actually a language task: explaining the operational risk of each
-violation in plain language and drafting a remediation - it never decides
-whether a component is validated or whether the layers are independent;
-that's computed in code from the architecture description.
+This checks a proposed CSfC (Commercial Solutions for Classified)
+architecture - the NSA program that lets sensitive government data travel
+over ordinary commercial encryption products instead of custom
+military-grade hardware, as long as it's wrapped in two independent
+encryption layers, each built only from NSA-approved product categories
+and individually certified secure (NIAP validation).
 
-`data/proposed_architecture.json` is synthetic, illustrative data written
-for this demo - not a real deployment or a real product's configuration.
+Every check here - is each component from an approved category, is it
+certified, are the two layers genuinely independent, do they run on
+separate network stacks - is answered entirely by plain code. Not by
+Claude, and not by a person reviewing it live. Claude's only job is
+explaining, in plain language, why a failed check matters operationally
+and what to do about it.
+
+`data/proposed_architecture.json` is a made-up example architecture built
+for this demo: five pretend components (a VPN gateway, two VPN clients, a
+device-management console, a key vault), each labeled with the category it
+claims, which encryption layer it's on, and whether it's certified. Four
+of the five have a deliberate, planted mistake, so the checks below have
+something real to catch - it isn't a real deployment or a real product's
+configuration.
 
 ## On sourcing, stated precisely
 
@@ -30,12 +40,9 @@ primary Mobile Access Capability Package PDF itself. Five independent
 attempts to fetch that document directly - `media.defense.gov`, `nsa.gov`,
 and an `archive.org` mirror, via both direct HTTP and an automated fetch
 tool - were blocked by access controls / rate limiting on NSA's end, not
-by anything on this end. Rather than invent a specific requirement number
-to sound more precise, this repo names the real, verified architectural
-principle each check enforces and says plainly that the primary document
-couldn't be independently reached - the same "cite it or say you couldn't
-verify it" discipline used everywhere else in this portfolio, applied here
-to an access limitation instead of a missing dataset.
+by anything on this end. This repo names the real, verified architectural
+principle each check enforces, and states plainly that the primary
+document itself couldn't be independently reached.
 
 ## Why this exists
 
