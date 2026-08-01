@@ -25,6 +25,19 @@ of the five have a deliberate, planted mistake, so the checks below have
 something real to catch - it isn't a real deployment or a real product's
 configuration.
 
+## Contents
+
+- [On sourcing, stated precisely](#on-sourcing-stated-precisely)
+- [Why this exists](#why-this-exists)
+- [Architecture](#architecture)
+- [Live result](#live-result)
+- [Prerequisites](#prerequisites)
+- [Running it](#running-it)
+- [Troubleshooting](#troubleshooting)
+- [Tests + CI](#tests--ci)
+- [Deployment path](#deployment-path)
+- [Security notes](#security-notes)
+
 ## On sourcing, stated precisely
 
 **Where the rules come from**
