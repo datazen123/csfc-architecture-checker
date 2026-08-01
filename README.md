@@ -5,7 +5,10 @@ architecture - the NSA program that lets sensitive government data travel
 over ordinary commercial encryption products instead of custom
 military-grade hardware, as long as it's wrapped in two independent
 encryption layers, each built only from NSA-approved product categories
-and individually certified secure (NIAP validation).
+and individually certified secure - **NIAP validation**, meaning tested
+and certified by the National Information Assurance Partnership, the
+U.S. government's own independent testing scheme, not a vendor's
+self-certification.
 
 Every check here - is each component from an approved category, is it
 certified, are the two layers genuinely independent, do they run on
