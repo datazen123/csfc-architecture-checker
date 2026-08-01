@@ -38,6 +38,8 @@ configuration.
 - [Deployment path](#deployment-path)
 - [Security notes](#security-notes)
 
+[↑ Back to top](#csfc-architecture-checker)
+
 ## On sourcing, stated precisely
 
 **Where the rules come from**
@@ -72,6 +74,8 @@ No exact requirement-ID citation from that document.
 
 Just the real principle behind each check, stated plainly - and an honest note that the primary document itself couldn't be reached.
 
+[↑ Back to top](#csfc-architecture-checker)
+
 ## Why this exists
 
 Checked for currency, not assumed:
@@ -89,6 +93,8 @@ Checked for currency, not assumed:
   language citation) reflects the same broader posture CSfC embodies:
   layered, independently-validated security components over single-vendor
   trust.
+
+[↑ Back to top](#csfc-architecture-checker)
 
 ## Architecture
 
@@ -114,6 +120,8 @@ data/proposed_architecture.json (synthetic)
   not ok? -> one bounded correction pass, then printed with
              [NEEDS HUMAN VERIFICATION] tags on anything still unresolved
 ```
+
+[↑ Back to top](#csfc-architecture-checker)
 
 ## Live result
 
@@ -155,9 +163,13 @@ Independent IP stack (2 components, 1 fail):
 
 **Result: 4 of 13 failed.** All 4 were explained by Claude and verified against their citations.
 
+[↑ Back to top](#csfc-architecture-checker)
+
 ## Prerequisites
 
 Python 3.9 or newer. Check with `python3 --version` before starting.
+
+[↑ Back to top](#csfc-architecture-checker)
 
 ## Running it
 
@@ -173,6 +185,8 @@ python csfc_checker.py
 The `python3 -m venv` step matters, not just good practice: on macOS,
 plain `pip install` can silently resolve to a leftover Python 2.7
 install instead of Python 3 - see Troubleshooting below.
+
+[↑ Back to top](#csfc-architecture-checker)
 
 ## Troubleshooting
 
@@ -193,6 +207,8 @@ above (`python3 -m venv .venv && source .venv/bin/activate`), then run
 install` - that forces the install through Python 3's own pip regardless
 of what `pip` alone resolves to on your system.
 
+[↑ Back to top](#csfc-architecture-checker)
+
 ## Tests + CI
 
 `test_csfc_checker.py` covers every deterministic check function and every
@@ -208,6 +224,8 @@ pytest -q
 bandit -r . -x "./.venv" --severity-level medium  # security lint, CI runs this too
 ```
 
+[↑ Back to top](#csfc-architecture-checker)
+
 ## Deployment path
 
 This demo calls the Anthropic API directly. A production version for a
@@ -217,6 +235,8 @@ gateway built for Defense Industrial Base contractors (`llm_client.py`
 includes an `AskSageClient` built from Ask Sage's
 [public API docs](https://github.com/Ask-Sage/AskSage-Open-Source-Community),
 untested pending an account).
+
+[↑ Back to top](#csfc-architecture-checker)
 
 ## Security notes
 
@@ -230,3 +250,5 @@ untested pending an account).
   ("SyntheticCorp ...").
 
 Built with [Claude Code](https://claude.com/claude-code).
+
+[↑ Back to top](#csfc-architecture-checker)
