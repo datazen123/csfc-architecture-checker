@@ -1,0 +1,38 @@
+{
+  "finding:4": {
+    "severities_by_sample": [
+      "high",
+      "high",
+      "critical"
+    ],
+    "consensus": "high",
+    "unanimous": false
+  },
+  "finding:8": {
+    "severities_by_sample": [
+      "critical",
+      "critical",
+      "high"
+    ],
+    "consensus": "critical",
+    "unanimous": false
+  },
+  "finding:10": {
+    "severities_by_sample": [
+      "critical",
+      "critical",
+      "critical"
+    ],
+    "consensus": "critical",
+    "unanimous": true
+  },
+  "finding:11": {
+    "severities_by_sample": [
+      "critical",
+      "critical",
+      "high"
+    ],
+    "consensus": "critical",
+    "unanimous": false
+  }
+}

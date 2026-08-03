@@ -31,6 +31,7 @@ configuration.
 - [Why this exists](#why-this-exists)
 - [Architecture](#architecture)
 - [Live result](#live-result)
+- [Self-consistency check](#self-consistency-check)
 - [Prerequisites](#prerequisites)
 - [Running it](#running-it)
 - [Troubleshooting](#troubleshooting)
@@ -165,6 +166,41 @@ Independent IP stack (2 components, 1 fail):
 
 [↑ Back to top](#csfc-architecture-checker)
 
+## Self-consistency check
+
+`self_consistency_check.py` applies
+[Wang, Wei, Schuurmans, Le, Chi, Narang, Chowdhery, Zhou, "Self-Consistency
+Improves Chain of Thought Reasoning in Language Models"](https://arxiv.org/abs/2203.11171)
+(ICLR 2023) to the severity-assignment call above: instead of trusting one
+sample, it calls the same prompt 3 times against the identical 4-finding
+payload, then deterministically majority-votes the severity for each
+finding - code decides the consensus, not Claude.
+
+**Actual measured result** (3 samples, all 4 findings verified in every
+sample):
+
+| Finding | Severity across 3 samples | Consensus |
+|---|---|---|
+| Custom Key Vault isn't a real category | high, high, critical | high (split) |
+| MDM console not NIAP-validated | critical, critical, high | critical (split) |
+| Layers not independent | critical, critical, critical | **critical (unanimous)** |
+| Missing independent IP stack | critical, critical, high | critical (split) |
+
+**Unanimous agreement: 1/4 (25%).** Reported honestly rather than
+re-running until the numbers looked better: severity judgment for this
+architecture isn't perfectly consistent call to call. What's notable is
+*where* it disagrees - every split is between two adjacent tiers
+(high/critical), never a wide swing (e.g. never low vs. critical). The
+layer-independence finding - arguably the most unambiguous violation in
+the set, since the two encryption layers are provably the same product -
+is also the one finding with unanimous agreement.
+
+```bash
+python self_consistency_check.py [--samples N]
+```
+
+[↑ Back to top](#csfc-architecture-checker)
+
 ## Prerequisites
 
 Python 3.9 or newer. Check with `python3 --version` before starting.
@@ -216,7 +252,9 @@ branch of `verify_findings` - no API key or network needed.
 `test_csfc_checker_properties.py` adds Hypothesis property-based tests -
 e.g. layer-independence pass/fail is proven to exactly track set
 disjointness between outer/inner product names across hundreds of
-generated product-name combinations, not the one hand-picked example:
+generated product-name combinations, not the one hand-picked example.
+`test_self_consistency_check.py` covers the majority-vote aggregation
+logic offline:
 
 ```bash
 pip install -r requirements-dev.txt
