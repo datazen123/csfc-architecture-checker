@@ -207,12 +207,17 @@ def main() -> None:
         print("All checks passed - nothing to report.")
         return
 
+    # Prefilling the assistant turn with the JSON's opening character is a
+    # documented Anthropic structured-output technique: it makes markdown-
+    # fence-wrapping structurally impossible for this response, rather than
+    # relying only on stripping fences after the fact. extract_json()'s
+    # fence-stripping stays in place as defense-in-depth.
     response = client.create(
         system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": json.dumps(payload, indent=2)}],
+        messages=[{"role": "user", "content": json.dumps(payload, indent=2)}, {"role": "assistant", "content": "{"}],
         max_tokens=2500,
     )
-    text = "".join(b.text for b in response.content if b.type == "text")
+    text = "{" + "".join(b.text for b in response.content if b.type == "text")
     report = extract_json(text)
 
     findings = verify_findings(report["findings"], id_index)
@@ -227,10 +232,11 @@ def main() -> None:
                 {"role": "assistant", "content": text},
                 {"role": "user", "content": CORRECTION_PROMPT_TEMPLATE.format(
                     failed_findings_json=json.dumps(unverified, indent=2))},
+                {"role": "assistant", "content": "["},
             ],
             max_tokens=1500,
         )
-        correction_text = "".join(b.text for b in correction_response.content if b.type == "text")
+        correction_text = "[" + "".join(b.text for b in correction_response.content if b.type == "text")
         try:
             corrected = verify_findings(extract_json(correction_text), id_index)
             corrected_by_item = {c.get("item"): c for c in corrected}
