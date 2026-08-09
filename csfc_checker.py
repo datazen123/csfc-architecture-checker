@@ -148,9 +148,35 @@ def build_payload(check_results: list[dict], components: list[dict]) -> tuple[li
     return payload, id_index
 
 
+# Claude's own severity vocabulary (critical/high/medium/low, per
+# SYSTEM_PROMPT), ranked so a finding's claimed severity can be checked
+# against a real floor derived from which real CSfC principle it violates -
+# independent of whether the remediation text happens to look substantive.
+# All four check types represent a genuine failure of CSfC's core
+# guarantee (two independent, certified encryption layers), which is why
+# three of the four floor at "critical": an unapproved component, an
+# uncertified one, or non-independent layers each individually defeat the
+# entire architecture, not a partial degradation of it. Independent IP
+# stack is scoped narrower (a shared-failure-point risk between two
+# otherwise-compliant layers), floored one tier lower at "high".
+SEVERITY_RANK = {"low": 0, "medium": 1, "high": 2, "critical": 3}
+MIN_SEVERITY_BY_CHECK = {
+    "component_category": "critical",
+    "niap_validation": "critical",
+    "layer_independence": "critical",
+    "independent_ip_stack": "high",
+}
+
+
 def verify_findings(findings: list[dict], id_index: dict[str, dict]) -> list[dict]:
     """Deterministic verifier - no LLM judgment. Checks every finding's
-    source_id resolves to a real failed check."""
+    source_id resolves to a real failed check, AND that its claimed
+    severity meets a real floor derived from which check it's about
+    (MIN_SEVERITY_BY_CHECK) - checked directly against the violated
+    principle, not inferred from whether the remediation text looks
+    complete. This closes the gap this repo's own README/injection_test.py
+    previously disclosed: a downgraded severity paired with a plausible-
+    sounding remediation used to pass verification untouched."""
     verified = []
     for f in findings:
         source_id = f.get("source_id")
@@ -159,6 +185,15 @@ def verify_findings(findings: list[dict], id_index: dict[str, dict]) -> list[dic
             note = "no source_id cited - cannot verify this finding against the underlying data"
         elif source_id not in id_index:
             note = f"source_id '{source_id}' does not match any failed check given to the model"
+        else:
+            cited = id_index[source_id]
+            min_severity = MIN_SEVERITY_BY_CHECK.get(cited.get("check"), "medium")
+            claimed_rank = SEVERITY_RANK.get(f.get("severity"), -1)
+            if claimed_rank < SEVERITY_RANK[min_severity]:
+                note = (f"'{source_id}' is a real '{cited.get('check')}' failure, which requires "
+                        f"severity of at least '{min_severity}', but this finding claims "
+                        f"'{f.get('severity')}' - checked directly against the violated principle, "
+                        f"independent of whether the remediation text looks substantive")
         verified.append({**f, "verified": note is None, "verification_note": note})
     return verified
 

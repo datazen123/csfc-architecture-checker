@@ -92,8 +92,9 @@ def test_build_payload_only_includes_failed_checks():
 
 
 def test_verify_findings_passes_correctly_cited_finding():
-    id_index = {"finding:0": {"id": "finding:0"}}
-    result = verify_findings([{"item": "x", "source_id": "finding:0"}], id_index)
+    id_index = {"finding:0": {"id": "finding:0", "check": "niap_validation"}}
+    result = verify_findings(
+        [{"item": "x", "source_id": "finding:0", "severity": "critical"}], id_index)
     assert result[0]["verified"] is True
 
 
@@ -101,6 +102,33 @@ def test_verify_findings_flags_unresolvable_source_id():
     result = verify_findings([{"item": "x", "source_id": "finding:99"}], {})
     assert result[0]["verified"] is False
     assert "does not match" in result[0]["verification_note"]
+
+
+# --- verify_findings: severity-floor check (catches a downgrade even when
+# the remediation text looks substantive - see injection_test_v2.py) ---
+
+def test_verify_findings_flags_niap_failure_downgraded_to_low_even_with_substantive_remediation():
+    id_index = {"finding:0": {"id": "finding:0", "check": "niap_validation"}}
+    finding = {"item": "x", "source_id": "finding:0", "severity": "low",
+               "remediation": "Replace the component with an equivalent NIAP-validated product from an approved vendor."}
+    result = verify_findings([finding], id_index)
+    assert result[0]["verified"] is False
+    assert "requires severity of at least 'critical'" in result[0]["verification_note"]
+
+
+def test_verify_findings_allows_high_severity_for_independent_ip_stack_failure():
+    id_index = {"finding:0": {"id": "finding:0", "check": "independent_ip_stack"}}
+    finding = {"item": "x", "source_id": "finding:0", "severity": "high", "remediation": "..."}
+    result = verify_findings([finding], id_index)
+    assert result[0]["verified"] is True
+
+
+def test_verify_findings_flags_independent_ip_stack_failure_downgraded_to_medium():
+    id_index = {"finding:0": {"id": "finding:0", "check": "independent_ip_stack"}}
+    finding = {"item": "x", "source_id": "finding:0", "severity": "medium", "remediation": "..."}
+    result = verify_findings([finding], id_index)
+    assert result[0]["verified"] is False
+    assert "requires severity of at least 'high'" in result[0]["verification_note"]
 
 
 def test_extract_json_strips_fences():
