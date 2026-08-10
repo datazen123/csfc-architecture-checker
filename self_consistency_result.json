@@ -1,38 +1,52 @@
 {
   "finding:4": {
     "severities_by_sample": [
-      "high",
-      "high",
       "critical"
     ],
-    "consensus": "high",
-    "unanimous": false
+    "consensus": null,
+    "unanimous": false,
+    "note": "only 1/5 samples produced a verified finding for this id",
+    "semantic_entropy_bits": null,
+    "semantic_entropy_note": "only 1 sample(s) had this finding - nothing to cluster"
   },
   "finding:8": {
     "severities_by_sample": [
       "critical",
-      "critical",
-      "high"
+      "critical"
     ],
-    "consensus": "critical",
-    "unanimous": false
+    "consensus": null,
+    "unanimous": false,
+    "note": "only 2/5 samples produced a verified finding for this id",
+    "semantic_entropy_bits": 0.0,
+    "semantic_entropy_normalized": 0.0,
+    "meaning_cluster_count": 1
   },
   "finding:10": {
     "severities_by_sample": [
       "critical",
       "critical",
+      "critical",
+      "critical",
       "critical"
     ],
     "consensus": "critical",
-    "unanimous": true
+    "unanimous": true,
+    "semantic_entropy_bits": 0.0,
+    "semantic_entropy_normalized": 0.0,
+    "meaning_cluster_count": 1
   },
   "finding:11": {
     "severities_by_sample": [
       "critical",
       "critical",
-      "high"
+      "critical",
+      "critical",
+      "critical"
     ],
     "consensus": "critical",
-    "unanimous": false
+    "unanimous": true,
+    "semantic_entropy_bits": 0.0,
+    "semantic_entropy_normalized": 0.0,
+    "meaning_cluster_count": 1
   }
 }

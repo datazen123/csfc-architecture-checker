@@ -195,28 +195,69 @@ Independent IP stack (2 components, 1 fail):
 [Wang, Wei, Schuurmans, Le, Chi, Narang, Chowdhery, Zhou, "Self-Consistency
 Improves Chain of Thought Reasoning in Language Models"](https://arxiv.org/abs/2203.11171)
 (ICLR 2023) [5] to the severity-assignment call above: instead of trusting one
-sample, it calls the same prompt 3 times against the identical 4-finding
+sample, it calls the same prompt 5 times against the identical 4-finding
 payload, then deterministically majority-votes the severity for each
 finding - code decides the consensus, not Claude.
 
-**Actual measured result** (3 samples, all 4 findings verified in every
-sample):
+**Actual measured result** (5 samples, 4-finding payload):
 
-| Finding | Severity across 3 samples | Consensus |
+| Finding | Severity across samples | Consensus |
 |---|---|---|
-| Custom Key Vault isn't a real category | high, high, critical | high (split) |
-| MDM console not NIAP-validated | critical, critical, high | critical (split) |
-| Layers not independent | critical, critical, critical | **critical (unanimous)** |
-| Missing independent IP stack | critical, critical, high | critical (split) |
+| Custom Key Vault isn't a real category | critical (only 1/5 samples verified it) | none - too little coverage |
+| MDM console not NIAP-validated | critical, critical (only 2/5 samples verified it) | none - too little coverage |
+| Layers not independent | critical x5 | **critical (unanimous)** |
+| Missing independent IP stack | critical x5 | **critical (unanimous)** |
 
-**Unanimous agreement: 1/4 (25%).** Reported honestly rather than
-re-running until the numbers looked better: severity judgment for this
-architecture isn't perfectly consistent call to call. What's notable is
-*where* it disagrees - every split is between two adjacent tiers
-(high/critical), never a wide swing (e.g. never low vs. critical). The
-layer-independence finding - arguably the most unambiguous violation in
-the set, since the two encryption layers are provably the same product -
-is also the one finding with unanimous agreement.
+**Unanimous agreement: 2/4 (50%).** Reported honestly rather than
+re-running until the numbers looked better: this run's real
+inconsistency wasn't severity disagreement on findings that showed up
+every time (both fully-covered findings were unanimous critical) - it
+was *coverage*. Two findings (the miscategorized Custom Key Vault and
+the non-NIAP-validated MDM console) were only written up, and only
+passed citation verification, in 1 and 2 of the 5 samples respectively.
+That's a real, worth-knowing gap: this architecture has 4 real
+violations, but a single sample of this call isn't guaranteed to surface
+all 4 of them.
+
+### Semantic entropy over the explanation text
+
+Severity is a fixed enum, so exact-match majority voting is already the
+right tool for it - but the free-text `explanation` Claude writes for
+each finding is not: wording varies sample to sample even when severity
+doesn't. `self_consistency_check.py` also runs
+[Farquhar, Kossen, Kuhn, Gal, "Detecting hallucinations in large language
+models using semantic entropy"](https://www.nature.com/articles/s41586-024-07421-0)
+(*Nature* 630, 625-630, 2024) [20] over each finding's sampled
+explanations: Claude itself clusters the explanations by shared meaning
+(temperature 0, one clustering call per finding), and `semantic_entropy.py`
+computes discrete Shannon entropy over the resulting cluster sizes - 0
+bits means every sample's explanation clustered together, higher means
+the *meaning* of the explanation varied, not just its wording. This is
+the paper's "discrete" semantic entropy variant (cluster counts, no token
+log-probabilities) - the right choice here since the Anthropic Messages
+API this repo's `llm_client.py` wraps doesn't expose per-token
+probabilities; see `semantic_entropy.py`'s docstring for the two
+adaptations made from the paper's exact procedure, stated plainly rather
+than assumed.
+
+**Actual measured result, same run:** all 3 findings with enough samples
+to cluster (2+) came back fully consistent - **3/3 (100%) zero semantic
+entropy**. For this architecture, unlike `network-config-drift-detector`'s
+result, the explanation text was as stable as the severity label
+wherever both had enough coverage to compare - a genuinely different,
+also-honestly-reported outcome, not a sign the technique isn't working
+here (the fewer, more clear-cut violations in this repo's fixture likely
+leave less room for the wording of *why* to drift).
+
+**In plain terms:** for these 3 findings, Claude didn't just pick the
+same severity word 5 times in a row - it also gave essentially the same
+paragraph of reasoning each time, judged by what the paragraphs actually
+said, not just their exact wording. That's the boring-but-reassuring
+outcome: nothing for this check to flag. It's the same test as the one
+run against `network-config-drift-detector` (where 2 findings did show
+a split), just a case where the answer came back clean. Read
+`self_consistency_result.json` after a run for the full per-finding
+breakdown, including the two under-covered findings.
 
 ```bash
 python self_consistency_check.py [--samples N]
@@ -384,7 +425,12 @@ disjointness between outer/inner product names across hundreds of
 generated product-name combinations, not the one hand-picked example.
 `test_self_consistency_check.py` covers the majority-vote aggregation
 logic offline. `test_injection_test.py` covers the adversarial-fixture
-setup logic offline:
+setup logic offline. `test_semantic_entropy.py` and
+`test_semantic_entropy_properties.py` cover the discrete semantic entropy
+math and the meaning-cluster response parsing/fallback offline - the
+Claude-judged clustering call itself (`cluster_by_meaning()`) isn't
+mocked, matching this repo's existing convention of only live-verifying
+API-calling code, never in pytest:
 
 ```bash
 pip install -r requirements-dev.txt
@@ -537,6 +583,10 @@ https://www.dmi-ida.org/knowledge-base-detail/AI-Strategy-DOW-Memo -
 see also ExecutiveGov, "Pete Hegseth Introduces War Department Strategy
 to Accelerate AI Adoption."
 https://www.executivegov.com/articles/dow-ai-adoption-strategy-hegseth
+
+[20] Farquhar, Kossen, Kuhn, Gal, "Detecting hallucinations in large
+language models using semantic entropy," *Nature* 630, 625-630, 2024.
+https://www.nature.com/articles/s41586-024-07421-0
 
 [↑ Back to top](#csfc-architecture-checker)
 

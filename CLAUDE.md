@@ -22,10 +22,14 @@ listings, NOT exact requirement-ID citations from the primary document -
 stated precisely rather than inventing a requirement number to sound more
 authoritative.
 
-**Status (2026-07-27)**: 18/18 tests passing (including Hypothesis
+**Status (2026-08-10)**: 43/43 tests passing (including Hypothesis
 property-based tests), live-verified end-to-end, first attempt, no
 correction pass needed - all 4 planted architecture violations correctly
-detected and explained.
+detected and explained. `self_consistency_check.py` now also runs
+discrete semantic entropy (Farquhar et al., *Nature* 2024) over each
+finding's sampled explanation text, in `semantic_entropy.py` - see
+README "Self-consistency check" for the live-measured result (default
+samples bumped 3->5 per the paper's own guidance).
 
 ## Non-negotiable discipline this whole portfolio follows
 
